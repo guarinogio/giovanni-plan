@@ -1,4 +1,10 @@
 /* eslint-disable no-undef */
+import { precacheAndRoute } from "workbox-precaching";
+
+// >>> Punto de inyección requerido por injectManifest:
+precacheAndRoute(self.__WB_MANIFEST || []);
+
+// ====== LÓGICA DE TIMER CON NOTIFICACIONES ======
 const timers = new Map();
 
 self.addEventListener("install", () => self.skipWaiting());
@@ -7,7 +13,7 @@ self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 function fmt(sec) {
   const m = Math.floor(sec / 60);
   const r = Math.max(0, sec % 60);
-  return `${String(m).padStart(2,"0")}:${String(r).padStart(2,"0")}`;
+  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
 }
 
 async function broadcast(msg) {
@@ -74,7 +80,6 @@ self.addEventListener("message", (e) => {
       clearInterval(t.iv);
       timers.delete(id);
     }
-    showTick(id); // refresca para cerrar
     broadcast({ type: "TIMER_STOPPED", id });
   } else if (type === "TIMER_PAUSE") {
     const t = timers.get(id);
@@ -94,7 +99,7 @@ self.addEventListener("message", (e) => {
     showTick(id);
     broadcast({ type: "TIMER_RESUMED", id });
   } else if (type === "PING") {
-    // mantiene vivo el SW en algunos navegadores
+    // keep-alive
   }
 });
 

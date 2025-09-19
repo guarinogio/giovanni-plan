@@ -9,7 +9,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       strategies: "injectManifest",
       srcDir: "src",
-      filename: "sw-countdown.js",
+      // usa un nombre de salida distinto al de entrada
+      filename: "sw.js",
       manifest: {
         name: "Plan de Fuerza — Giovanni",
         short_name: "Fuerza Gio",
@@ -24,7 +25,9 @@ export default defineConfig({
         ]
       },
       injectManifest: {
-        globPatterns: ["**/*.{js,css,html,png,svg,ico}"]
+        // qué ficheros precachear
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        swSrc: "src/sw-countdown.js", // tu SW de origen
       }
     })
   ]
