@@ -23,7 +23,7 @@ export default function SessionPage() {
       {dayType === "A" && (
         <div className="space-y-4">
           <StaticListCard title="Pre-Movilidad" hint="5–8 min rápido" items={[{n:"Respiración 360°",rec:"2×5"},{n:"Cat-Camel",rec:"1×8"},{n:"90/90 cadera",rec:"1×6/lado"},{n:"Tobillo rocks",rec:"1×10/lado"}]} state={sessionInputs.preA} setState={(p)=>handleInput(["preA"],p)} />
-          <HeavyLiftCard title={"Sentadilla — " + config.variants.squat} hint={"Top 3–5 @ RPE8 · Back-offs 2×5 @ ~90% (~"+roundToStep(weights.squat*0.9,config.rounding)+" "+config.units+")"} state={sessionInputs.squat} setState={(p)=>handleInput(["squat"],p)} rounding={config.rounding} units={config.units} />
+          <HeavyLiftCard title={"Sentadilla — " + config.variants.squat} hint={"Top 3–5 @ RPE8 · Back-offs 2×5 @ ~90% (~"+roundToStep(weights.squat*0.9,config.rounding)+" "+config.units+")"} state={sessionInputs.squat} setState={(p)=>handleInput(["squat"],p)} rounding={config.rounding} units={config.units} recTop={weights.squat} />
           <DoubleProgCard title="Press de Banca" hint={"3×5–8 @ "+weights.bench+" "+config.units} state={sessionInputs.bench} setState={(p)=>handleInput(["bench"],p)} units={config.units} rounding={config.rounding} rec={weights.bench} />
           <DoubleProgCard title={"Remo — "+config.variants.row} hint={"3×6–10 @ "+weights.row+" "+config.units} state={sessionInputs.row} setState={(p)=>handleInput(["row"],p)} units={config.units} rounding={config.rounding} rec={weights.row} />
           <AccessoryCard title="Hip Thrust" hint="3×6–10" state={sessionInputs.hipthrust} setState={(p)=>handleInput(["hipthrust"],p)} units={config.units} rec={weights.hipthrustAcc} withWeight />
@@ -37,7 +37,7 @@ export default function SessionPage() {
       {dayType === "B" && (
         <div className="space-y-4">
           <StaticListCard title="Pre-Movilidad" hint="5–8 min rápido" items={[{n:"Respiración 360°",rec:"2×5"},{n:"Cat-Camel",rec:"1×8"},{n:"Tobillo rocks",rec:"1×10/lado"}]} state={sessionInputs.preB} setState={(p)=>handleInput(["preB"],p)} />
-          <HeavyLiftCard title={"Peso Muerto — " + config.variants.deadlift} hint={"Top 3–5 @ RPE8 · Back-offs 2×5 @ ~90% (~"+roundToStep(weights.deadlift*0.9,config.rounding)+" "+config.units+")"} state={sessionInputs.deadlift} setState={(p)=>handleInput(["deadlift"],p)} rounding={config.rounding} units={config.units} />
+          <HeavyLiftCard title={"Peso Muerto — " + config.variants.deadlift} hint={"Top 3–5 @ RPE8 · Back-offs 2×5 @ ~90% (~"+roundToStep(weights.deadlift*0.9,config.rounding)+" "+config.units+")"} state={sessionInputs.deadlift} setState={(p)=>handleInput(["deadlift"],p)} rounding={config.rounding} units={config.units} recTop={weights.deadlift} />
           <DoubleProgCard title={config.variants.press} hint={"3×5–8 @ "+weights.press+" "+config.units} state={sessionInputs.press} setState={(p)=>handleInput(["press"],p)} units={config.units} rounding={config.rounding} rec={weights.press} />
           <DoubleProgCard title={config.variants.pulldown} hint={"3×6–10 @ "+weights.pulldown+" "+config.units} state={sessionInputs.pulldown} setState={(p)=>handleInput(["pulldown"],p)} units={config.units} rounding={config.rounding} rec={weights.pulldown} />
           <DoubleProgCard title="Hip Thrust (Fuerza)" hint={"3×6–10 @ "+weights.hipthrust+" "+config.units} state={sessionInputs.hipthrustB} setState={(p)=>handleInput(["hipthrustB"],p)} units={config.units} rounding={config.rounding} rec={weights.hipthrust} />
