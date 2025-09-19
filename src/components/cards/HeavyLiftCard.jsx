@@ -4,6 +4,7 @@ import Stepper from "../Stepper.jsx";
 
 export default function HeavyLiftCard({ title, hint, state, setState, rounding, units }) {
   const s = state ?? { topWeight: 0, topReps: 0, topRPE: 8, backoffs: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] };
+
   useEffect(() => {
     if (!s.backoffs[0].weight && s.topWeight) {
       const bo = Math.round(((s.topWeight || 0) * 0.9) / rounding) * rounding;
@@ -15,7 +16,7 @@ export default function HeavyLiftCard({ title, hint, state, setState, rounding, 
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-      <HeaderWithHint title={title} hint={hint} />
+      <HeaderWithHint title={title} hint={hint} recRestSec={150} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>

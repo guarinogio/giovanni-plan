@@ -2,16 +2,7 @@ import React from "react";
 import HeaderWithHint from "../ui/HeaderWithHint.jsx";
 import Stepper from "../Stepper.jsx";
 
-export default function AccessoryCard({
-  title,
-  hint,
-  state,
-  setState,
-  simple = false,
-  units = "kg",
-  rec = 0,
-  withWeight = true
-}) {
+export default function AccessoryCard({ title, hint, state, setState, simple=false, units="kg", rec=0, withWeight=true }) {
   const targetLen = simple ? 2 : 3;
 
   const migrate = (s) => {
@@ -31,15 +22,9 @@ export default function AccessoryCard({
 
   const s = migrate(state);
 
-  const setWeight = (w) => setState({ ...s, weight: w });
-  const setRep = (i, v) => {
-    const reps = s.reps.map((r, idx) => (idx === i ? Math.max(0, Math.round(v)) : r));
-    setState({ ...s, reps });
-  };
-
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-      <HeaderWithHint title={title} hint={hint} />
+      <HeaderWithHint title={title} hint={hint} recRestSec={75} />
 
       {withWeight && (
         <div>
@@ -47,15 +32,15 @@ export default function AccessoryCard({
             <div className="text-xs text-neutral-500">Peso ({units})</div>
             <div className="text-[11px] text-neutral-400">Rec: {rec} {units}</div>
           </div>
-          <Stepper value={s.weight ?? 0} onChange={setWeight} step={0.5} unit={units} className="mt-1" />
+          <Stepper value={s.weight ?? 0} onChange={(v)=>setState({ ...s, weight:v })} step={0.5} unit={units} className="mt-1" />
         </div>
       )}
 
-      <div className={"grid grid-cols-1 " + (simple ? "sm:grid-cols-2" : "sm:grid-cols-3") + " gap-3"}>
+      <div className={"grid grid-cols-1 "+(simple?"sm:grid-cols-2":"sm:grid-cols-3")+" gap-3"}>
         {s.reps.map((val, i) => (
           <div key={i}>
             <div className="text-xs text-neutral-500">Serie {i + 1} — Reps</div>
-            <Stepper value={val ?? 0} onChange={(v) => setRep(i, v)} step={1} className="mt-1" />
+            <Stepper value={val ?? 0} onChange={(v)=>setState({ ...s, reps:s.reps.map((r,idx)=>idx===i?Math.max(0,Math.round(v)):r) })} step={1} className="mt-1" />
           </div>
         ))}
       </div>
