@@ -3,7 +3,11 @@ import react from "@vitejs/plugin-react";
 import tailwind from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+// En GitHub Actions (o cualquier deploy) servimos bajo /giovanni-plan/
+const isCI = process.env.GITHUB_ACTIONS === "true";
+
 export default defineConfig({
+  base: isCI ? "/giovanni-plan/" : "/",   // 👈 clave
   plugins: [
     react(),
     tailwind(),
