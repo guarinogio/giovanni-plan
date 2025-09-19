@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -18,21 +18,49 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Garantiza que NO se use pnpm/yarn por Corepack
+      - name: Disable Corepack shims
+        run: corepack disable || true
+
+      # Verificación estricta: solo npm con package-lock.json
+      - name: Ensure npm lockfile exists and no other lockfiles
+        run: |
+          test -f package-lock.json || (echo "❌ Falta package-lock.json (requerido para npm ci)" && exit 1)
+          test ! -f pnpm-lock.yaml || (echo "❌ pnpm-lock.yaml detectado. El deploy usa npm ci, elimina el lockfile de pnpm." && exit 1)
+          test ! -f yarn.lock || (echo "❌ yarn.lock detectado. El deploy usa npm ci, elimina el lockfile de yarn." && exit 1)
+
+      - name: Setup Node.js (NPM)
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run build
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      # Limpia caché de npm si quieres instalación 100% fresca (opcional)
+      # - run: npm cache clean --force
+
+      - name: Install (npm ci)
+        run: npm ci --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
       # SPA fallback (GH Pages) — copia index.html a 404.html
-      - run: cp dist/index.html dist/404.html
-      - uses: actions/upload-pages-artifact@v3
+      - name: Add SPA fallback
+        run: cp dist/index.html dist/404.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - id: deployment
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
