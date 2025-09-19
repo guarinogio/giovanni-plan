@@ -2,19 +2,30 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-
-    <!-- Usa %BASE_URL% para que funcione tanto en dev como en GitHub Pages -->
     <link rel="icon" href="%BASE_URL%favicon.svg" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Plan de Fuerza — Giovanni</title>
+
+    <!-- Anti-FOUC: aplica el tema antes de cargar la app -->
+    <script>
+      (function () {
+        try {
+          var ls = localStorage.getItem("theme");
+          var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var theme = ls || (systemDark ? "dark" : "light");
+          var html = document.documentElement;
+          if (theme === "dark") html.classList.add("dark"); else html.classList.remove("dark");
+          // Mantiene coherencia con el sistema si el usuario no eligió aún
+          if (!ls) localStorage.setItem("theme", theme);
+        } catch (_) {}
+      })();
+    </script>
 
     <!-- Metadata -->
     <meta
       name="description"
       content="Plan de fuerza con temporizador de descansos, progresiones, ajustes y registro offline."
     />
-    <!-- Debe coincidir con manifest.theme_color -->
     <meta name="theme-color" content="#0ea5e9" />
 
     <!-- iOS / Apple -->
@@ -32,17 +43,6 @@
     />
     <meta property="og:url" content="https://guarinogio.github.io/giovanni-plan/" />
     <meta property="og:image" content="%BASE_URL%pwa-512x512.png" />
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Plan de Fuerza — Giovanni" />
-    <meta
-      name="twitter:description"
-      content="Plan de fuerza con temporizador de descansos, progresiones, ajustes y registro offline."
-    />
-    <meta name="twitter:image" content="%BASE_URL%pwa-512x512.png" />
-
-    <!-- El <link rel="manifest"> lo inyecta vite-plugin-pwa en build -->
   </head>
   <body>
     <div id="root"></div>

@@ -7,20 +7,18 @@ import { VitePWA } from "vite-plugin-pwa";
 const isCI = process.env.GITHUB_ACTIONS === "true";
 const base = isCI ? "/giovanni-plan/" : "/";
 
+// PWA en dev opcional (evita warnings por glob en dev-dist)
+const enablePwaInDev = process.env.VITE_ENABLE_PWA_DEV === "true";
+
 export default defineConfig({
-  base, // 👈 asegura URLs correctas en GitHub Pages
+  base,
   plugins: [
     react(),
     tailwind(),
     VitePWA({
-      // SW generado automáticamente
       registerType: "autoUpdate",
-      injectRegister: "auto", // inline/auto: evita rutas raras en Pages
-      includeAssets: [
-        "favicon.svg",
-        "apple-touch-icon.png",
-        "robots.txt"
-      ],
+      injectRegister: "auto",
+      includeAssets: ["favicon.svg", "apple-touch-icon.png", "robots.txt"],
       manifest: {
         name: "Plan de Fuerza — Giovanni",
         short_name: "Plan Giovanni",
@@ -28,62 +26,31 @@ export default defineConfig({
           "Plan de fuerza con temporizador de descansos, progresiones, ajustes y registro offline.",
         lang: "es",
         dir: "ltr",
-        start_url: `${base}`,          // 👈 importante para Pages
-        scope: `${base}`,              // 👈 importante para Pages
+        start_url: `${base}`,
+        scope: `${base}`,
         display: "standalone",
-        theme_color: "#0ea5e9",        // debe coincidir con <meta name="theme-color">
+        theme_color: "#0ea5e9",
         background_color: "#ffffff",
         orientation: "portrait",
-        categories: ["fitness", "health", "productivity"],
         icons: [
-          {
-            src: "pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any"
-          },
-          {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any"
-          },
-          {
-            src: "pwa-512x512-maskable.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable"
-          }
+          { src: "pwa-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "pwa-512x512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
         ],
-        // (Opcional) accesos directos
         shortcuts: [
-          {
-            name: "Sesión",
-            short_name: "Sesión",
-            url: `${base}?tab=session`
-          },
-          {
-            name: "Plan",
-            short_name: "Plan",
-            url: `${base}?tab=plan`
-          },
-          {
-            name: "Historial",
-            short_name: "Historial",
-            url: `${base}?tab=history`
-          }
+          { name: "Sesión", short_name: "Sesión", url: `${base}?tab=session` },
+          { name: "Plan", short_name: "Plan", url: `${base}?tab=plan` },
+          { name: "Historial", short_name: "Historial", url: `${base}?tab=history` }
         ]
       },
       workbox: {
-        // Cachea los assets generados y estáticos
+        // Mantener sólo en build (dist). En dev no hay archivos aún -> evitar warnings.
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
-        // SPA fallback para rutas internas en Pages
-        navigateFallback: "index.html",
-        // (Opcional) ignora llamadas a APIs externas
-        // navigateFallbackDenylist: [/^\/api\//]
+        navigateFallback: "index.html"
       },
+      // Desactivar PWA en dev, a menos que lo fuerces con VITE_ENABLE_PWA_DEV=true
       devOptions: {
-        enabled: true  // habilita PWA en dev para probar
+        enabled: enablePwaInDev
       }
     })
   ],

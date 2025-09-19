@@ -1,5 +1,176 @@
 @import "tailwindcss";
 
-/* opcional: ajustes globales que usábamos */
-:root { color-scheme: light dark; }
+/* Tailwind v4: habilita la variante dark basada en la clase .dark en <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ========== BASE ========== */
 html, body, #root { height: 100%; }
+
+/* Claro por defecto */
+body {
+  @apply bg-white text-neutral-900;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+/* Oscuro global */
+.dark body { @apply bg-neutral-950 text-neutral-100; }
+
+/* ========== COMPONENTES GENERALES ========== */
+.card { @apply bg-white rounded-2xl shadow-sm; }
+.dark .card { @apply bg-neutral-900; }
+
+/* Header: tabbar / segmented control */
+.tabbar { @apply bg-neutral-100 p-1 rounded-xl; }
+.tab-active { 
+  @apply bg-white shadow-sm text-neutral-900;
+  @apply ring-1 ring-neutral-200; /* halo sutil en claro */
+}
+.dark .tabbar { @apply bg-neutral-800; }
+.dark .tab-active { 
+  @apply bg-neutral-900 text-white;
+  @apply ring-1 ring-neutral-800; /* halo sutil en oscuro */
+}
+
+/* Separadores / bordes suaves */
+.hr-muted { @apply border-neutral-200; }
+.dark .hr-muted { @apply border-neutral-800; }
+
+/* Inputs base (input / select / textarea) */
+:is(input, select, textarea).input,
+.input {
+  @apply w-full px-3 py-2 rounded-xl border border-neutral-200 bg-white text-inherit outline-none;
+}
+.dark :is(input, select, textarea).input,
+.dark .input { @apply border-neutral-800 bg-neutral-900; }
+
+/* Number: quita spinners nativos para consistencia visual */
+.input[type="number"] { -moz-appearance: textfield; }
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Select genérico (si no usas .input) */
+.select { @apply w-full px-3 py-2 rounded-xl border border-neutral-200 bg-white text-inherit outline-none; }
+.dark .select { @apply border-neutral-800 bg-neutral-900; }
+
+/* Botones */
+.btn {
+  @apply inline-flex items-center gap-2 rounded-xl px-3 py-2 border border-transparent
+         bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300;
+}
+.dark .btn { @apply bg-neutral-800 hover:bg-neutral-700 active:bg-neutral-600; }
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold
+         text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800;
+}
+
+/* Toggle “pill” y grupos */
+.toggle {
+  @apply inline-flex items-center gap-2 select-none rounded-full px-3 py-2
+         bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300;
+}
+.dark .toggle { @apply bg-neutral-800 hover:bg-neutral-700 active:bg-neutral-600; }
+
+.toggle-group { @apply bg-neutral-100 p-1 rounded-xl flex w-full; }
+.toggle-active { @apply bg-white shadow-sm font-semibold text-neutral-900; }  /* claro */
+.dark .toggle-group { @apply bg-neutral-800; }
+.dark .toggle-active { @apply bg-neutral-900 text-white; }                    /* oscuro */
+
+/* ===== Checkboxes / radios =====
+   Forzamos apariencia nativa para que en CLARO se vean blancos con borde
+   y en OSCURO respeten accent-color con buen contraste. */
+input[type="checkbox"], input[type="radio"] {
+  -webkit-appearance: auto;
+  appearance: auto;
+  accent-color: #2563eb;  /* indigo-600 */
+}
+.dark input[type="checkbox"], .dark input[type="radio"] {
+  accent-color: #60a5fa;  /* blue-400 */
+}
+
+/* Selección de texto */
+::selection { @apply bg-sky-300/60; }
+.dark ::selection { @apply bg-sky-600/40; }
+
+/* ========== RELOJ DEL TEMPORIZADOR ========== */
+/* Cápsula invertida para destacar el tiempo activo */
+.time-badge {
+  @apply inline-flex items-center justify-center rounded-lg px-2 py-1 font-semibold tabular-nums;
+  background-color: rgb(23 23 23);  /* neutral-900 (para tema claro) */
+  color: #fff;
+}
+.dark .time-badge {
+  background-color: #ffffff;        /* claro en tema oscuro */
+  color: rgb(23 23 23);             /* neutral-900 */
+}
+
+/* Pulso suave cuando corre (se quita al pausar) */
+@keyframes pulse-soft {
+  0%   { box-shadow: 0 0 0 0 rgba(59,130,246,.35); }   /* indigo-500 */
+  100% { box-shadow: 0 0 0 10px rgba(59,130,246,0); }
+}
+.timer-pulse { animation: pulse-soft 1.2s ease-out infinite; }
+
+/* ========== ACCESIBILIDAD Y PREFERENCIAS ========== */
+/* Indica a los UAs que soportas ambos temas (mejora controles nativos) */
+:root { color-scheme: light dark; }
+.dark { color-scheme: dark; }
+
+/* Foco visible uniforme (teclado/a11y) */
+:is(button, a, input, select, textarea):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.45);
+}
+.dark :is(button, a, input, select, textarea):focus-visible {
+  box-shadow: 0 0 0 3px rgba(96,165,250,.55);
+}
+
+/* Respeta usuarios con “reducir movimiento” */
+@media (prefers-reduced-motion: reduce) {
+  .timer-pulse { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
+
+/* ========== OVERRIDES PARA UTILIDADES TAILWIND EN MODO OSCURO ========== */
+/* Fondos */
+.dark .bg-white       { background-color: rgb(23 23 23) !important; }  /* neutral-900 */
+.dark .bg-neutral-50  { background-color: rgb(10 10 10) !important; }  /* neutral-950 */
+.dark .bg-neutral-100 { background-color: rgb(38 38 38) !important; }  /* neutral-800 */
+.dark .bg-neutral-200 { background-color: rgb(64 64 64) !important; }  /* neutral-700 */
+.dark .bg-neutral-300 { background-color: rgb(82 82 82) !important; }  /* neutral-600 */
+
+/* Texto */
+.dark .text-black,
+.dark .text-neutral-900 { color: rgb(245 245 245) !important; }  /* neutral-100 */
+.dark .text-neutral-800 { color: rgb(229 229 229) !important; }
+.dark .text-neutral-700 { color: rgb(212 212 212) !important; }
+.dark .text-neutral-600,
+.dark .text-neutral-500 { color: rgb(163 163 163) !important; }
+
+/* Bordes */
+.dark .border-neutral-100 { border-color: rgb(64 64 64) !important; }  /* neutral-700 */
+.dark .border-neutral-200,
+.dark .border-neutral-300 { border-color: rgb(38 38 38) !important; }  /* neutral-800 */
+.dark .border-neutral-400 { border-color: rgb(64 64 64) !important; }  /* neutral-700 */
+
+/* Pills/Chips con hover/active claros */
+.dark .hover\:bg-neutral-100:hover   { background-color: rgb(38 38 38) !important; }
+.dark .active\:bg-neutral-300:active { background-color: rgb(82 82 82) !important; }
+.dark .active\:bg-neutral-200:active { background-color: rgb(64 64 64) !important; }
+
+/* Inputs sueltos con utilidades */
+.dark input.bg-white,
+.dark select.bg-white,
+.dark textarea.bg-white { background-color: rgb(23 23 23) !important; }
+.dark input.border-neutral-200,
+.dark select.border-neutral-200,
+.dark textarea.border-neutral-200 { border-color: rgb(38 38 38) !important; }
+
+/* Fallback de grupos si algún componente usa clases antiguas */
+.dark .tabbar, .dark .tabs, .dark .toggle-group { background-color: rgb(38 38 38) !important; }
+.dark .tab-active, .dark .toggle-active { background-color: rgb(23 23 23) !important; }
+
+/* Scrollbar */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,.15); border-radius: 8px; }
+.dark *::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.2); }
