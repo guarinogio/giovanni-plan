@@ -8,43 +8,83 @@ const isCI = process.env.GITHUB_ACTIONS === "true";
 const base = isCI ? "/giovanni-plan/" : "/";
 
 export default defineConfig({
-  base, // 👈 clave para que las URLs de assets apunten a /giovanni-plan/ en Pages
+  base, // 👈 asegura URLs correctas en GitHub Pages
   plugins: [
     react(),
     tailwind(),
     VitePWA({
-      // SW generado automáticamente (sin lógica custom)
-      strategies: "generateSW",
+      // SW generado automáticamente
       registerType: "autoUpdate",
-      // Habilita el SW también en dev para probar
-      devOptions: { enabled: true },
-
-      // Manifest PWA: usa base para start_url y scope
+      injectRegister: "auto", // inline/auto: evita rutas raras en Pages
+      includeAssets: [
+        "favicon.svg",
+        "apple-touch-icon.png",
+        "robots.txt"
+      ],
       manifest: {
         name: "Plan de Fuerza — Giovanni",
-        short_name: "Fuerza Gio",
-        start_url: base,     // 👈 debe coincidir con base
-        scope: base,         // 👈 igual que base
+        short_name: "Plan Giovanni",
+        description:
+          "Plan de fuerza con temporizador de descansos, progresiones, ajustes y registro offline.",
+        lang: "es",
+        dir: "ltr",
+        start_url: `${base}`,          // 👈 importante para Pages
+        scope: `${base}`,              // 👈 importante para Pages
         display: "standalone",
-        background_color: "#0f172a",
-        theme_color: "#0f172a",
+        theme_color: "#0ea5e9",        // debe coincidir con <meta name="theme-color">
+        background_color: "#ffffff",
+        orientation: "portrait",
+        categories: ["fitness", "health", "productivity"],
         icons: [
-          // Importante: SIN "/" inicial para que Vite preprenda base
-          { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
-          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
-          { src: "pwa-512x512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-          // (opcional) Apple touch icon si lo tienes en /public
-          { src: "apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+          {
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any"
+          },
+          {
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any"
+          },
+          {
+            src: "pwa-512x512-maskable.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable"
+          }
+        ],
+        // (Opcional) accesos directos
+        shortcuts: [
+          {
+            name: "Sesión",
+            short_name: "Sesión",
+            url: `${base}?tab=session`
+          },
+          {
+            name: "Plan",
+            short_name: "Plan",
+            url: `${base}?tab=plan`
+          },
+          {
+            name: "Historial",
+            short_name: "Historial",
+            url: `${base}?tab=history`
+          }
         ]
       },
-
-      // Qué ficheros precachear
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg}"]
+        // Cachea los assets generados y estáticos
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
+        // SPA fallback para rutas internas en Pages
+        navigateFallback: "index.html",
+        // (Opcional) ignora llamadas a APIs externas
+        // navigateFallbackDenylist: [/^\/api\//]
       },
-
-      // (opcional) registra el SW en línea para evitar rutas raras
-      injectRegister: "inline"
+      devOptions: {
+        enabled: true  // habilita PWA en dev para probar
+      }
     })
   ],
   build: {
