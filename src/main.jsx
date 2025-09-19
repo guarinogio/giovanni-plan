@@ -1,10 +1,9 @@
-import "./index.css";              // <-- IMPORTA TAILWIND ANTES QUE NADA
-
+import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./MobilePlanGiovanni.jsx";
 
-// Registro del PWA (no toca CSS)
+// registro del SW autogenerado (no tiene notificaciones)
 import { registerSW } from "virtual:pwa-register";
 registerSW({ immediate: true });
 

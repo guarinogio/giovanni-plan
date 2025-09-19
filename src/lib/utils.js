@@ -1,126 +1,159 @@
-import { useEffect, useState } from "react";
+export const roundToStep = (n, step = 0.5) => {
+  if (!Number.isFinite(n)) return 0;
+  const r = Math.round(n / step) * step;
+  return parseFloat(r.toFixed(3));
+};
 
-export function useLocalStorage(key, initialValue) {
-  const [state, setState] = useState(() => {
-    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : initialValue; } catch { return initialValue; }
-  });
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(state)); } catch {} }, [key, state]);
-  return [state, setState];
-}
+export const formatDate = (iso) => {
+  try { return new Date(iso).toLocaleDateString(); } catch { return ""; }
+};
 
-export function roundToStep(v, step) { if (!step) return v; return Math.round(v / step) * step; }
-
-export function setDeep(obj, path, value) {
-  const clone = { ...obj };
-  let cur = clone;
-  for (let i = 0; i < path.length - 1; i++) { const k = path[i]; cur[k] = { ...cur[k] }; cur = cur[k]; }
+export const setDeep = (obj, path, value) => {
+  const copy = JSON.parse(JSON.stringify(obj));
+  let cur = copy;
+  for (let i = 0; i < path.length - 1; i++) cur = cur[path[i]];
   cur[path[path.length - 1]] = value;
-  return clone;
-}
+  return copy;
+};
 
-export function formatDate(iso) {
-  const d = new Date(iso);
-  const dd = d.toLocaleDateString(undefined, { weekday: "short", day: "2-digit", month: "short" });
-  const hh = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-  return dd + " " + hh;
-}
-
-export function createEmptySession(dayType, config, weights) {
-  if (dayType === "A") return {
-    preA:{done:[false,false,false,false]},
-    squat:{topWeight:weights.squat,topReps:0,topRPE:8,backoffs:[{weight:roundToStep(weights.squat*0.9,config.rounding),reps:0},{weight:roundToStep(weights.squat*0.9,config.rounding),reps:0}]},
-    bench:{weight:weights.bench,reps:[0,0,0]},
-    row:{weight:weights.row,reps:[0,0,0]},
-    hipthrust:{weight:weights.hipthrustAcc,reps:[0,0,0]},
-    posturaBrazosA:{a:{weight:weights.facepulls,reps:[0,0,0]}, b:{weight:weights.curl,reps:[0,0,0]}},
-    coreA:{weight:0,reps:[0,0]}, // sin peso
-    piesA:{a:{weight:0,reps:[0,0,0]}, b:{weight:0,reps:[0,0,0]}}, // sin peso
-    postA:{done:[false,false]}
-  };
-  if (dayType === "B") return {
-    preB:{done:[false,false,false]},
-    deadlift:{topWeight:weights.deadlift,topReps:0,topRPE:8,backoffs:[{weight:roundToStep(weights.deadlift*0.9,config.rounding),reps:0},{weight:roundToStep(weights.deadlift*0.9,config.rounding),reps:0}]},
-    press:{weight:weights.press,reps:[0,0,0]},
-    pulldown:{weight:weights.pulldown,reps:[0,0,0]},
-    hipthrustB:{weight:weights.hipthrust,reps:[0,0,0]},
-    gluteoMedio:{a:{weight:0,reps:[0,0,0]}, b:{weight:0,reps:[0,0,0]}}, // sin peso
-    triceps:{weight:weights.triceps,reps:[0,0,0]},
-    coreB:{weight:0,reps:[0,0]}, // sin peso
-    piesB:{a:{weight:0,reps:[0,0,0]}, b:{weight:0,reps:[0,0,0]}}, // sin peso
-    postB:{done:[false,false]}
-  };
-  return { morn:{done:[false,false,false,false,false,false]}, day:{done:[false,false,false,false,false]} };
-}
-
-export function applyProgressions({ weights, config, logs }) {
-  const last = logs[logs.length - 1];
-  const prev = logs.slice(0, -1).reverse();
-  const hist = (k) => prev.filter((s)=>s.exercises[k]).map((s)=>s.exercises[k]);
-  let next = { ...weights };
-
-  if (last.exercises.squat) next.squat = evolveHeavy(weights.squat, [last.exercises.squat, ...hist("squat")], config);
-  if (last.exercises.deadlift) next.deadlift = evolveHeavy(weights.deadlift, [last.exercises.deadlift, ...hist("deadlift")], config);
-  if (last.exercises.bench) next.bench = evolveDouble(weights.bench, last.exercises.bench, config.benchIncrement, config.rounding);
-  if (last.exercises.row) next.row = evolveDouble(weights.row, last.exercises.row, config.rowIncrement, config.rounding);
-  if (last.exercises.press) next.press = evolveDouble(weights.press, last.exercises.press, config.pressIncrement, config.rounding);
-  if (last.exercises.pulldown) next.pulldown = evolveDouble(weights.pulldown, last.exercises.pulldown, config.pulldownIncrement, config.rounding);
-  if (last.exercises.hipthrustB) next.hipthrust = evolveDouble(weights.hipthrust, last.exercises.hipthrustB, config.hipthrustIncrement, config.rounding);
-
-  next.hipthrustAcc = evolveAccessory(weights.hipthrustAcc ?? 0, last.exercises.hipthrust, [6,10], 2.5, config.rounding, true);
-  if (last.exercises.posturaBrazosA) {
-    next.facepulls = evolveAccessory(weights.facepulls ?? 0, last.exercises.posturaBrazosA?.a, [10,15], 2.5, config.rounding, true);
-    next.curl = evolveAccessory(weights.curl ?? 0, last.exercises.posturaBrazosA?.b, [8,12], 2.5, config.rounding, true);
+export const createEmptySession = (dayType, config, weights) => {
+  const z = { done: [] };
+  const heavy = { topWeight: 0, topReps: 0, topRPE: 8, backoffs: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] };
+  const triple = { weight: 0, reps: [0, 0, 0] };
+  const pair = { a: { weight: 0, reps: [0, 0, 0] }, b: { weight: 0, reps: [0, 0, 0] } };
+  if (dayType === "A") {
+    return {
+      preA: z,
+      squat: heavy,
+      bench: { ...triple, weight: 0 },
+      row: { ...triple, weight: 0 },
+      hipthrust: { ...triple, weight: 0 },
+      posturaBrazosA: { a: { weight: 0, reps: [0, 0, 0] }, b: { weight: 0, reps: [0, 0, 0] } },
+      coreA: { reps: [0, 0, 0] },
+      piesA: { a: { reps: [0, 0, 0] }, b: { reps: [0, 0, 0] } },
+      postA: z
+    };
   }
-  if (last.exercises.triceps) next.triceps = evolveAccessory(weights.triceps ?? 0, last.exercises.triceps, [8,12], 2.5, config.rounding, true);
-  // sin peso: gluteoMedio, core, pies -> no cambian pesos recomendados
-
-  return next;
-}
-
-export function evolveHeavy(current, sequence, config) {
-  const ok = (s) => (s.topRPE ?? 10) <= 8 && (s.topReps ?? 0) >= 3 && (s.topReps ?? 0) <= 5;
-  const fail = (s) => (s.topRPE ?? 10) > 8 || (s.topReps ?? 0) < 3;
-  const a = sequence[0], b = sequence[1];
-  if (a && b && ok(a) && ok(b)) return roundToStep(current + config.heavyIncrement, config.rounding);
-  if (a && b && fail(a) && fail(b) && a.topWeight === b.topWeight) return roundToStep(current * 0.9, config.rounding);
-  return current;
-}
-
-export function evolveDouble(current, now, inc, rounding) {
-  const pass = now.reps.filter((r)=>(r ?? 0) >= 8).length === 3;
-  if (pass) return roundToStep(current + inc, rounding);
-  return current;
-}
-
-// data puede ser: {weight, reps:[...]} o {sets:[{reps...}]} o array de sets
-export function evolveAccessory(current, data, [minRep, maxRep], inc, rounding, hasWeight = true) {
-  if (!data) return current || 0;
-  let reps = [];
-  if (Array.isArray(data)) reps = data.map((s) => s?.reps ?? 0);
-  else if (Array.isArray(data.sets)) reps = data.sets.map((s) => s?.reps ?? 0);
-  else if (Array.isArray(data.reps)) reps = data.reps.map((r) => r ?? 0);
-  const allAtTop = reps.length > 0 && reps.every((r) => r >= maxRep);
-  const allTooLow = reps.length > 0 && reps.every((r) => r <= Math.max(0, minRep - 2));
-  if (!hasWeight) return current || 0;
-  if (allAtTop) return roundToStep((current || 0) + inc, rounding);
-  if (allTooLow) return roundToStep(Math.max(0, (current || 0) - inc), rounding);
-  return current || 0;
-}
-
-export function prettyExerciseRow(key, v) {
-  const name = prettyName(key);
-  if (v && v.topWeight !== undefined) return name + " Top " + v.topWeight + "×" + v.topReps + " RPE " + v.topRPE + " | Back-offs " + v.backoffs.map((b)=>b.weight+"×"+b.reps).join(", ");
-  if (v && v.weight !== undefined && Array.isArray(v.reps)) return name + " " + v.weight + "×" + v.reps.join("/");
-  if (v && v.a && v.b) {
-    const left = (v.a.weight !== undefined ? v.a.weight + "×" : "") + (Array.isArray(v.a.reps) ? v.a.reps.join("/") : "");
-    const right = (v.b.weight !== undefined ? v.b.weight + "×" : "") + (Array.isArray(v.b.reps) ? v.b.reps.join("/") : "");
-    return name + " A:" + left + " · B:" + right;
+  if (dayType === "B") {
+    return {
+      preB: z,
+      deadlift: heavy,
+      press: { ...triple, weight: 0 },
+      pulldown: { ...triple, weight: 0 },
+      hipthrustB: { ...triple, weight: 0 },
+      gluteoMedio: { a: { reps: [0, 0, 0] }, b: { reps: [0, 0, 0] } },
+      triceps: { ...triple, weight: 0 },
+      coreB: { reps: [0, 0, 0] },
+      piesB: { a: { reps: [0, 0, 0] }, b: { reps: [0, 0, 0] } },
+      postB: z
+    };
   }
-  if (v && v.done) return name + " " + v.done.filter(Boolean).length + "/" + v.done.length + " completados";
-  return name;
-}
+  return {
+    morn: z,
+    day: z
+  };
+};
 
-export function prettyName(k) {
-  const map = { preA:"Pre-Mov A", postA:"Post-Mov A", preB:"Pre-Mov B", postB:"Post-Mov B", morn:"Mov. Mañana", day:"Mov. Día", squat:"Sentadilla", deadlift:"Peso Muerto", bench:"Banca", row:"Remo", press:"Press", pulldown:"Jalón", hipthrust:"Hip Thrust", hipthrustB:"Hip Thrust (Fuerza)", posturaBrazosA:"Face Pulls + Curl", coreA:"Dead Bug", piesA:"Pies", gluteoMedio:"Abducciones", triceps:"Tríceps", coreB:"Core", piesB:"Pies" };
-  return map[k] || k;
-}
+const getLastSessions = (logs, key, n = 3) => {
+  const arr = [];
+  for (let i = logs.length - 1; i >= 0 && arr.length < n; i--) {
+    const ex = logs[i]?.exercises?.[key];
+    if (ex) arr.push(ex);
+  }
+  return arr;
+};
+
+const lastUsedWeight = (entry) => {
+  if (!entry) return 0;
+  if (entry.topWeight != null) return entry.topWeight;
+  if (typeof entry.weight === "number") return entry.weight;
+  if (entry.sets && Array.isArray(entry.sets)) {
+    const w = entry.sets.map(s => s?.weight).find(v => typeof v === "number");
+    if (typeof w === "number") return w;
+  }
+  if (Array.isArray(entry.reps)) return entry.weight || 0;
+  return 0;
+};
+
+const minReps = (arr) => Math.min(...arr.map(v => Math.max(0, v || 0)));
+const allAtLeast = (arr, x) => arr.every(v => (v || 0) >= x);
+const allAtMost = (arr, x) => arr.every(v => (v || 0) <= x);
+
+export const applyProgressions = ({ weights, config, logs }) => {
+  const w = { ...weights };
+  const step = config.rounding || 0.5;
+
+  const inc = {
+    bench: config.benchIncrement ?? 2.5,
+    press: config.pressIncrement ?? 2.5,
+    row: config.rowIncrement ?? 5,
+    pulldown: config.pulldownIncrement ?? 2.5,
+    hipthrust: config.hipthrustIncrement ?? 5
+  };
+  const heavyInc = config.heavyIncrement ?? 5;
+
+  const heavyRule = (key) => {
+    const last = getLastSessions(logs, key, 2);
+    const cur = last[0];
+    const lw = roundToStep(lastUsedWeight(cur) || w[key], step);
+    w[key] = lw;
+    if (last.length >= 2) {
+      const ok2 = last.slice(0, 2).every(s => (s.topRPE || 10) <= 8 && (s.topReps || 0) >= 3);
+      const bad2 = last.slice(0, 2).every(s => (s.topRPE || 10) > 8 || (s.topReps || 0) < 3);
+      if (ok2) w[key] = roundToStep(lw + heavyInc, step);
+      else if (bad2) w[key] = roundToStep(lw * 0.9, step);
+    }
+  };
+
+  const doubleRule = (key, upInc) => {
+    const last = getLastSessions(logs, key, 2);
+    const cur = last[0];
+    const lw = roundToStep(lastUsedWeight(cur) || w[key], step);
+    w[key] = lw;
+    if (!cur) return;
+    const reps = Array.isArray(cur.reps) ? cur.reps : [];
+    const top = allAtLeast(reps, 8);
+    const low = last.length >= 2 && last.every(s => allAtMost(Array.isArray(s.reps) ? s.reps : [], 5));
+    if (top) w[key] = roundToStep(lw + upInc, step);
+    else if (low) w[key] = roundToStep(Math.max(step, lw - upInc), step);
+  };
+
+  const accRule = (key, low, high, upInc) => {
+    const last = getLastSessions(logs, key, 2);
+    const cur = last[0];
+    const lw = roundToStep(lastUsedWeight(cur) || w[key], step);
+    w[key] = lw;
+    if (!cur) return;
+    const reps = Array.isArray(cur.reps) ? cur.reps : [];
+    const top = allAtLeast(reps, high);
+    const low2 = last.length >= 2 && last.every(s => {
+      const rs = Array.isArray(s.reps) ? s.reps : [];
+      return allAtMost(rs, low);
+    });
+    if (top) w[key] = roundToStep(lw + upInc, step);
+    else if (low2) w[key] = roundToStep(Math.max(step, lw - upInc), step);
+  };
+
+  heavyRule("squat");
+  heavyRule("deadlift");
+  doubleRule("bench", inc.bench);
+  doubleRule("press", inc.press);
+  doubleRule("row", inc.row);
+  doubleRule("pulldown", inc.pulldown);
+  doubleRule("hipthrust", inc.hipthrust);
+  accRule("hipthrustAcc", 6, 10, inc.hipthrust);
+  accRule("facepulls", 10, 15, 1);
+  accRule("curl", 8, 12, 1);
+  accRule("triceps", 8, 12, 1);
+
+  return w;
+};
+
+export const prettyExerciseRow = (k, v) => {
+  const u = (x) => (Number.isFinite(x) ? x : 0);
+  if (v?.topWeight != null) return `${k}: ${u(v.topWeight)}x${u(v.topReps)} RPE ${u(v.topRPE)} · BO ${u(v.backoffs?.[0]?.weight)}x${u(v.backoffs?.[0]?.reps)}/${u(v.backoffs?.[1]?.weight)}x${u(v.backoffs?.[1]?.reps)}`;
+  if (typeof v?.weight === "number" && Array.isArray(v?.reps)) return `${k}: ${u(v.weight)} × [${v.reps.map(u).join("/")}]`;
+  if (Array.isArray(v?.a?.reps) || Array.isArray(v?.b?.reps)) return `${k}: A [${(v.a?.reps||[]).map(u).join("/")}] · B [${(v.b?.reps||[]).map(u).join("/")}]`;
+  if (Array.isArray(v?.reps)) return `${k}: [${v.reps.map(u).join("/")}]`;
+  return `${k}`;
+};

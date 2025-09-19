@@ -4,19 +4,23 @@ import { useLocalStorage, roundToStep, setDeep, formatDate, createEmptySession, 
 const Ctx = createContext(null);
 export function usePlanStore() { return useContext(Ctx); }
 
+function useLS(key, initial) {
+  return useLocalStorage ? useLocalStorage(key, initial) : useState(initial);
+}
+
 export function PlanStoreProvider({ children }) {
   const [tab, setTab] = useState("sesion");
   const [dayType, setDayType] = useState("A");
-  const [config, setConfig] = useLocalStorage("giov_plan_config", {
+  const [config, setConfig] = useLS("giov_plan_config", {
     units: "kg", rounding: 0.5, heavyIncrement: 5, heavySmallIncrement: 2.5, benchIncrement: 2.5, pressIncrement: 2.5, rowIncrement: 5, pulldownIncrement: 2.5, hipthrustIncrement: 5,
     variants: { squat: "Box Squat", deadlift: "Trap Bar", bench: "Press de Banca", press: "Press Inclinado", row: "Remo con Pecho Apoyado", pulldown: "Jalón Supino" }
   });
-  const [weights, setWeights] = useLocalStorage("giov_plan_weights", {
+  const [weights, setWeights] = useLS("giov_plan_weights", {
     squat: 60, deadlift: 80, bench: 50, press: 40, row: 60, pulldown: 50, hipthrust: 80,
     hipthrustAcc: 40, facepulls: 15, curl: 10, triceps: 15, calves: 40, tibialis: 10
   });
-  const [logs, setLogs] = useLocalStorage("giov_plan_logs", []);
-  const [lastType, setLastType] = useLocalStorage("giov_plan_lastType", null);
+  const [logs, setLogs] = useLS("giov_plan_logs", []);
+  const [lastType, setLastType] = useLS("giov_plan_lastType", null);
   const [sessionInputs, setSessionInputs] = useState(createEmptySession(dayType, config, weights));
   const today = useMemo(() => new Date().toISOString(), []);
 
