@@ -1,5 +1,5 @@
 @import "tailwindcss";
 
-/* opcional: pequeños defaults para mejor tipografía móvil */
+/* opcional: ajustes globales que usábamos */
+:root { color-scheme: light dark; }
 html, body, #root { height: 100%; }
-body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }

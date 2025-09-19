@@ -1,13 +1,15 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import './index.css'
-import MobilePlanGiovanni from './MobilePlanGiovanni.jsx'
-import { registerSW } from 'virtual:pwa-register'
+import "./index.css";              // <-- IMPORTA TAILWIND ANTES QUE NADA
 
-registerSW({ immediate: true })
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./MobilePlanGiovanni.jsx";
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// Registro del PWA (no toca CSS)
+import { registerSW } from "virtual:pwa-register";
+registerSW({ immediate: true });
+
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <MobilePlanGiovanni />
+    <App />
   </React.StrictMode>
-)
+);

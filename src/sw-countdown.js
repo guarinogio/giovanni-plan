@@ -1,25 +1,24 @@
 /* eslint-disable no-undef */
 import { precacheAndRoute } from "workbox-precaching";
 
-// >>> Punto de inyección requerido por injectManifest:
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// ====== LÓGICA DE TIMER CON NOTIFICACIONES ======
+// ---- temporizador con notificaciones persistentes ----
 const timers = new Map();
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 
-function fmt(sec) {
+const fmt = (sec) => {
   const m = Math.floor(sec / 60);
   const r = Math.max(0, sec % 60);
   return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
-}
+};
 
-async function broadcast(msg) {
+const broadcast = async (msg) => {
   const cs = await self.clients.matchAll({ includeUncontrolled: true, type: "window" });
   cs.forEach((c) => c.postMessage(msg));
-}
+};
 
 async function showTick(id) {
   const t = timers.get(id);
@@ -98,8 +97,6 @@ self.addEventListener("message", (e) => {
     ensureTicking(id);
     showTick(id);
     broadcast({ type: "TIMER_RESUMED", id });
-  } else if (type === "PING") {
-    // keep-alive
   }
 });
 
