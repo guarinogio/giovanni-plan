@@ -1,91 +1,88 @@
-import React from "react";
-import { usePlanStore } from "../state/PlanStore.jsx";
-import NumberRow from "../components/ui/NumberRow.jsx";
-import SelectRow from "../components/ui/SelectRow.jsx";
-import ThemeToggle from "../components/ui/ThemeToggle.jsx";
+import useAppStore from '../state/useAppStore.js'
 
 export default function SettingsPage() {
-  const { config, setConfig, weights, setWeights } = usePlanStore();
+  const theme = useAppStore((s) => s.theme || 'dark')
+  const setTheme = useAppStore((s) => s.setTheme)
+
+  function toggleTheme() {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
+  }
 
   return (
-    <main className="p-4 space-y-4 pb-24">
-      {/* Apariencia */}
-      <section className="card p-4 space-y-3">
-        <div className="text-sm font-semibold">Apariencia</div>
+    <div className="space-y-6 pb-24 text-neutral-900 dark:text-neutral-100">
+      <header className="px-4 pt-6 space-y-1">
+        <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+          Ajustes
+        </h1>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          Todo esto es solo para ti. Tus datos viven en este dispositivo.
+        </p>
+      </header>
+
+      <section className="mx-4 space-y-4 rounded-2xl bg-white p-4 ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-800">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-neutral-600 dark:text-neutral-300">
-            Tema
-            <div className="text-xs text-neutral-500 dark:text-neutral-400">
-              Cambia entre claro y oscuro. Se recuerda en este dispositivo.
-            </div>
+          <div>
+            <h2 className="mb-1 text-sm font-medium text-neutral-900 dark:text-neutral-200">
+              Tema
+            </h2>
+            <p className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+              Claro u oscuro. Se guarda en este dispositivo.
+            </p>
           </div>
-          <ThemeToggle />
+
+          <button
+            onClick={toggleTheme}
+            className={
+              theme === 'dark'
+                ? 'rounded-full bg-neutral-800 px-4 py-2 text-xs font-semibold text-white ring-1 ring-neutral-700'
+                : 'rounded-full bg-white px-4 py-2 text-xs font-semibold text-neutral-900 ring-1 ring-neutral-300'
+            }
+          >
+            {theme === 'dark' ? 'Oscuro' : 'Claro'}
+          </button>
         </div>
       </section>
 
-      {/* Unidades y redondeo */}
-      <section className="card p-4 space-y-3">
-        <div className="text-sm font-semibold">Unidades y redondeo</div>
-        <div className="grid grid-cols-2 gap-3 items-end">
-          <div>
-            <label className="text-xs text-neutral-500 dark:text-neutral-400">Unidades</label>
-            <select
-              className="select mt-1"
-              value={config.units}
-              onChange={(e) => setConfig({ ...config, units: e.target.value })}
-            >
-              <option value="kg">kg</option>
-              <option value="lb">lb</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-xs text-neutral-500 dark:text-neutral-400">Redondeo</label>
-            <input
-              type="number"
-              step="0.25"
-              min="0"
-              className="input mt-1"
-              value={config.rounding}
-              onChange={(e) => setConfig({ ...config, rounding: parseFloat(e.target.value || 0.5) })}
-            />
-          </div>
-        </div>
+      <section className="mx-4 space-y-2 rounded-2xl bg-white p-4 ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-800">
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+          Estado
+        </h2>
+        <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+          No hay login, nube ni analíticas. El progreso vive en localStorage.
+          Si borras datos del navegador, pierdes el progreso guardado.
+        </p>
       </section>
 
-      {/* Variantes */}
-      <section className="card p-4 space-y-3">
-        <div className="text-sm font-semibold">Variantes</div>
-        <SelectRow
-          label="Sentadilla"
-          value={config.variants.squat}
-          onChange={(v) => setConfig({ ...config, variants: { ...config.variants, squat: v } })}
-          options={["Box Squat", "Front Squat"]}
-        />
-        <SelectRow
-          label="Peso Muerto"
-          value={config.variants.deadlift}
-          onChange={(v) => setConfig({ ...config, variants: { ...config.variants, deadlift: v } })}
-          options={["Trap Bar", "Convencional desde bloques"]}
-        />
-        <SelectRow
-          label="Press (día B)"
-          value={config.variants.press}
-          onChange={(v) => setConfig({ ...config, variants: { ...config.variants, press: v } })}
-          options={["Press Inclinado", "Landmine Press"]}
-        />
-        <SelectRow
-          label="Remo"
-          value={config.variants.row}
-          onChange={(v) => setConfig({ ...config, variants: { ...config.variants, row: v } })}
-          options={["Remo con Pecho Apoyado", "Remo Pendlay"]}
-        />
-        <SelectRow
-          label="Jalón"
-          value={config.variants.pulldown}
-          onChange={(v) => setConfig({ ...config, variants: { ...config.variants, pulldown: v } })}
-          options={["Jalón Supino", "Jalón Neutral"]}
-        />
+      <section className="mx-4 space-y-2 rounded-2xl bg-white p-4 ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-800">
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+          Autoprogresión
+        </h2>
+        <ul className="space-y-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+          <li>
+            Core: sube rondas semanales si lo haces casi todos los días sin que
+            la lumbar pase de 2/10.
+          </li>
+          <li>
+            Cardio Zona 2: sube minutos objetivo si cumples tiempo suave sin
+            dolor raro en lumbar ni falta de aire fuerte.
+          </li>
+          <li>
+            Fuerza técnica: si completas todas las series limpias en un
+            ejercicio, siguiente vez ese ejercicio empieza un poco más pesado.
+          </li>
+          <li>
+            Movilidad: si la vas saltando, el sistema fuerza versión completa
+            para que abras cadera, pecho y cuello.
+          </li>
+        </ul>
       </section>
-    </main>
-  );
+
+      <section className="mx-4 pb-24 text-center text-[10px] leading-relaxed text-neutral-600 dark:text-neutral-600">
+        <p>
+          Si aparece hormigueo, entumecimiento, debilidad repentina o dolor que
+          baja por la pierna, paras y pides valoración médica.
+        </p>
+      </section>
+    </div>
+  )
 }

@@ -1,28 +1,15 @@
-import "./index.css";
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./MobilePlanGiovanni.jsx";
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App.jsx'
+import './index.css'
 
-// Registro del SW con flujo de actualización
-import { registerSW } from "virtual:pwa-register";
+const root = document.getElementById('root')
 
-const updateSW = registerSW({
-  immediate: true,
-  onNeedRefresh() {
-    // Muestra un prompt básico; puedes reemplazar por un toast bonito
-    const ok = confirm("Hay una nueva versión disponible. ¿Actualizar ahora?");
-    if (ok) {
-      updateSW(true);
-    }
-  },
-  onOfflineReady() {
-    // Puedes mostrar un aviso: "Listo para usarse sin conexión"
-    console.log("PWA lista para uso offline");
-  }
-});
-
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+createRoot(root).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+)
