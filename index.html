@@ -1,51 +1,21 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="%BASE_URL%favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Plan de Fuerza — Giovanni</title>
+    <link rel="icon" href="/giovanni-plan/icon-192.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
 
-    <!-- Anti-FOUC: aplica el tema antes de cargar la app -->
-    <script>
-      (function () {
-        try {
-          var ls = localStorage.getItem("theme");
-          var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-          var theme = ls || (systemDark ? "dark" : "light");
-          var html = document.documentElement;
-          if (theme === "dark") html.classList.add("dark"); else html.classList.remove("dark");
-          // Mantiene coherencia con el sistema si el usuario no eligió aún
-          if (!ls) localStorage.setItem("theme", theme);
-        } catch (_) {}
-      })();
-    </script>
-
-    <!-- Metadata -->
-    <meta
-      name="description"
-      content="Plan de fuerza con temporizador de descansos, progresiones, ajustes y registro offline."
+    <link
+      rel="manifest"
+      href="/giovanni-plan/manifest.webmanifest"
     />
-    <meta name="theme-color" content="#0ea5e9" />
 
-    <!-- iOS / Apple -->
-    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Plan Giovanni" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Plan de Fuerza — Giovanni" />
-    <meta
-      property="og:description"
-      content="Plan de fuerza con temporizador de descansos, progresiones, ajustes y registro offline."
-    />
-    <meta property="og:url" content="https://guarinogio.github.io/giovanni-plan/" />
-    <meta property="og:image" content="%BASE_URL%pwa-512x512.png" />
+    <title>Plan diario</title>
   </head>
   <body>
     <div id="root"></div>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

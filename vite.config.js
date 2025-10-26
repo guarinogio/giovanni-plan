@@ -8,7 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'script-defer',
+      injectRegister: null,
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        navigateFallback: '/giovanni-plan/index.html'
+      },
       manifest: {
         name: 'Plan diario',
         short_name: 'Plan',
@@ -19,17 +23,17 @@ export default defineConfig({
         theme_color: '#000000',
         icons: [
           {
-            src: '/giovanni-plan/icon-192.png',
+            src: 'icon-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/giovanni-plan/icon-512.png',
+            src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/giovanni-plan/maskable-icon-512.png',
+            src: 'maskable-icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
