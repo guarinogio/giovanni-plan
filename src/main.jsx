@@ -10,7 +10,14 @@ function registerServiceWorker() {
     const swUrl = `${base}sw.js`
 
     navigator.serviceWorker
-      .register(swUrl, { scope: base })
+      .register(swUrl, {
+        scope: base
+      })
+      .then((reg) => {
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+        }
+      })
       .catch((err) => {
         console.error('Fallo al registrar SW', err)
       })
